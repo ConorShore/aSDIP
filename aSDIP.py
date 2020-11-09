@@ -107,7 +107,7 @@ for element in inpacket.goose.goosePdu_element.allData_tree.Data:
 
 inpacket.goose.goosePdu_element.allData_raw[0].raw_value=databytes
 
-#print(databytes)
+
 #set put correct value for number of entries in
 inpacket.goose.goosePdu_element.numDatSetEntries_raw[2].raw_value=str(counter)
 
@@ -191,7 +191,7 @@ goosefull=goosenondata
 goosefull+=bytearray.fromhex("AB")
 goosefull+=DataToBytesRaw(int(int(len(inpacket.goose.goosePdu_element.allData_raw[0]))/2))
 goosefull+=databytes
-inpacket.goose.goosePdu_element_raw[0].raw_value=databytes
+inpacket.goose.goosePdu_element_raw[0].raw_value=goosefull
 
 #start packet of with ethernet header
 outpacket=etherhead
@@ -209,11 +209,6 @@ outpacket+=bytearray.fromhex("81")
 outpacket+=DataToBytesRaw(int(int(len(inpacket.goose.goosePdu_element_raw[0]))/2))
 
 outpacket+=goosefull
-
-
-
-
-
 
 
 sock=socket(AF_PACKET,SOCK_RAW)
