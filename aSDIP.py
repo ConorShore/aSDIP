@@ -7,10 +7,8 @@ from socket import socket, AF_PACKET, SOCK_RAW
 import sys
 
 
-if 'little' == sys.byteorder:
-    print("little")
-else:
-    print("big")
+ininterface="lo"
+outinterface="lo"
 
 def DataToBytesRaw(invar):
     temp=0
@@ -77,23 +75,52 @@ inpacket=cap[0]
 # which is used to only capture ethertype of 0x088b8, so GOOSE
 # promisc="true" mean that it will listen for traffic not destined for itself, so everything
 
-#edit packet here, edit inpacket directly
+##edit packet between here
 
 
-# to change a piece of data, call the LFC function with a string represneting the
-# byte you want to cahnge
+
+##and here
+
+
+# to change a piece of data, you need to edit the raw.data field of that data
+#i'm pretty sure every raw data is formatted as a string
 # an example:
 
 #   #varibale change assigned object with string "8000" passed through 
 #   #i.e change it to an IP type packet
-#   inpacket.eth.type_raw[0]=pyshark.packet.fields.LayerFieldsContainer("8000")
+#   inpacket.eth.type_raw[0].raw_data="8000"
+
+#changing data in packet
+#
+#inpacket.goose.goosePdu_element.allData_tree.Data_raw[0][0]
+
+#packet rebuild
+
+#rebuild data
+counter=0
+databytes=bytearray()
+for element in inpacket.goose.goosePdu_element.allData_tree.Data:
+    databytes+=DataToBytesRaw(int(element)+128)
+    print(inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][2])
+    databytes+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][2]))
+    databytes+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.allData_tree.Data_tree[counter].padding_raw[0]))
+    databytes+=bytearray.fromhex(inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][0])
+    counter+=1
 
 
-#print(cap['GOOSE'].pretty_print())
-#inpacket['GOOSE'].goosePdu_element.numDatSetEntries=221
-#change=pyshark.packet.fields.LayerFieldsContainer('0f')
 
-print(inpacket)
+
+inpacket.goose.goosePdu_element.allData_raw[0].raw_value=databytes
+
+
+
+
+
+#set build all of these to be correct based on data
+int(inpacket.goose.goosePdu_element.numDatSetEntries_raw[2])
+(inpacket.goose.goosePdu_element_raw[0])
+
+
 
 #ether header
 outpacket=bytearray.fromhex(inpacket.eth.dst_raw[0])
@@ -113,29 +140,77 @@ outpacket+=bytearray.fromhex("61")
 outpacket+=bytearray.fromhex("81")
 
 #thanks python for being bad
-print(int(int(len(inpacket.goose.goosePdu_element_raw[0]))/2))
-##might be stored in goosePdu_element_raw[2] testing required
+#would it be too much to ask for an int?
 
 #calculates the 0x61 length
 outpacket+=DataToBytesRaw(int(int(len(inpacket.goose.goosePdu_element_raw[0]))/2))
 
 #gocb
 outpacket+=bytearray.fromhex("80")
-#outpacket+=bytearray.fromhex("1c")
 outpacket+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.gocbRef_raw[2]))
 outpacket+=bytearray.fromhex(inpacket.goose.goosePdu_element.gocbRef_raw[0])
 
+#ttl
+outpacket+=bytearray.fromhex("81")
+outpacket+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.timeAllowedtoLive_raw[2]))
+outpacket+=bytearray.fromhex(inpacket.goose.goosePdu_element.timeAllowedtoLive_raw[0])
+
+#datSet
+outpacket+=bytearray.fromhex("82")
+outpacket+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.datSet_raw[2]))
+outpacket+=bytearray.fromhex(inpacket.goose.goosePdu_element.datSet_raw[0])
+
+#goID
+outpacket+=bytearray.fromhex("83")
+outpacket+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.goID_raw[2]))
+outpacket+=bytearray.fromhex(inpacket.goose.goosePdu_element.goID_raw[0])
+
+#time
+outpacket+=bytearray.fromhex("84")
+outpacket+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.t_raw[2]))
+outpacket+=bytearray.fromhex(inpacket.goose.goosePdu_element.t_raw[0])
+
+#stNum
+outpacket+=bytearray.fromhex("85")
+outpacket+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.stNum_raw[2]))
+outpacket+=bytearray.fromhex(inpacket.goose.goosePdu_element.stNum_raw[0])
+
+#sqNum
+outpacket+=bytearray.fromhex("86")
+outpacket+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.sqNum_raw[2]))
+outpacket+=bytearray.fromhex(inpacket.goose.goosePdu_element.sqNum_raw[0])
+
+#test
+outpacket+=bytearray.fromhex("87")
+outpacket+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.test_raw[2]))
+outpacket+=bytearray.fromhex(inpacket.goose.goosePdu_element.test_raw[0])
+
+#confRev
+outpacket+=bytearray.fromhex("88")
+outpacket+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.confRev_raw[2]))
+outpacket+=bytearray.fromhex(inpacket.goose.goosePdu_element.confRev_raw[0])
+
+#ndsCom
+outpacket+=bytearray.fromhex("89")
+outpacket+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.ndsCom_raw[2]))
+outpacket+=bytearray.fromhex(inpacket.goose.goosePdu_element.ndsCom_raw[0])
+
+#numDatSetEntries
+outpacket+=bytearray.fromhex("8A")
+outpacket+=DataToBytesRaw(int(inpacket.goose.goosePdu_element.numDatSetEntries_raw[2]))
+outpacket+=bytearray.fromhex(inpacket.goose.goosePdu_element.numDatSetEntries_raw[0])
+
+outpacket+=bytearray.fromhex("AB")
+outpacket+=DataToBytesRaw(int(int(len(inpacket.goose.goosePdu_element.allData_raw[0]))/2))
+outpacket+=bytearray.fromhex(inpacket.goose.goosePdu_element.allData_raw[0])
 
 
 
 
 
-print(outpacket)
 
 sock=socket(AF_PACKET,SOCK_RAW)
 sock.bind(('lo', 0))
-#print(inpacket.get_raw_packet())
-#print(bytearray(inpacket.get_raw_packet()))
 sock.send(bytearray(outpacket))
 
 
