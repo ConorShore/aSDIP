@@ -2,7 +2,6 @@
 
 #scapy
 from scapy.all import *
-import goose
 import pyshark
 
 import sys
@@ -44,12 +43,20 @@ def BytesToStringRaw(invar):
 
 
 def PrepareUnit(data,head):
-    #pass head as string, with no 0x i.e "8f"
-    #data can be of any type
+    #used for converting non string pyshark data to scapy
     outpacket=bytes()
     outpacket=outpacket+BytesToStringRaw(head)
     outpacket=outpacket+BytesToStringRaw(int(len(data)/2))
     outpacket=outpacket+BytesToStringRaw(data)
+    return outpacket
+
+def PrepareUnitString(data,head):
+    #pass head as string, with no 0x i.e "8f"
+    #data can be of any type
+    outpacket=bytes()
+    outpacket=outpacket+BytesToStringRaw(head)
+    outpacket=outpacket+BytesToStringRaw(int(len(data)))
+    outpacket=outpacket+bytes(data,"utf-8")
     return outpacket
 
 def StringToStringHex(input):
@@ -58,6 +65,12 @@ def StringToStringHex(input):
     for element in s:
         string+=format(element,'x')
     return string
+
+# taken from mdehus's goose-IEC61850-scapy repo
+# GPL-2.0
+# https://github.com/mdehus/goose-IEC61850-scapy
+
+
 
 
 #sort out endianness (needs to be big)
@@ -113,7 +126,14 @@ outpacket=outpacket/b
 
 
 #gocbRef
-outpacket=outpacket/PrepareUnit(inpacket[0]['GOOSE'].gocbRef.raw_value,0x80)
+#b=bytes.fromhex("80") 
+#outpacket=outpacket/b
+#b=BytesToStringRaw(int(len(inpacket[0]['GOOSE'].gocbRef.show)))
+#outpacket=outpacket/b
+#print(inpacket[0]['GOOSE'].gocbRef.show)
+#outpacket=outpacket/inpacket[0]['GOOSE'].gocbRef.show
+
+outpacket=outpacket/PrepareUnitString(inpacket[0]['GOOSE'].gocbRef.show,0x80)
 
 #TimeAllowtolive
 outpacket=outpacket/PrepareUnit(inpacket[0]['GOOSE'].timeAllowedtoLive.raw_value,0x81)
