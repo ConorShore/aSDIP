@@ -1,5 +1,8 @@
+#this is where the UI is run from
+
 from cmd import Cmd
-from aSDIP_Engine import *
+from .aSDIP_Engine import *
+from .aSDIP_Examine import *
 
 class main_ui(Cmd):
     prompt = '>>> '

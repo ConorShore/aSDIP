@@ -1,4 +1,4 @@
-# this file is used to define function where a circular import mioght occur
+# this file is used to define function where a circular import might occur
 import pyshark
 
 def LFC(str):

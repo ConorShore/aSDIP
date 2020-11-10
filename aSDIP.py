@@ -1,7 +1,12 @@
 #! /usr/bin/env python
 
-#scapy
-from aSDIP_UI import *
 
+#this is the file you execute
 
-main_ui().cmdloop()
+from src.aSDIP_UI import *
+
+try:
+    main_ui().cmdloop()
+except KeyboardInterrupt:
+    print()
+    print("Bye!")

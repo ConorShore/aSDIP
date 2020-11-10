@@ -1,6 +1,6 @@
 #This where your code is run on the packet's recieved
 
-from aSDIP_Header import LFC
+from .aSDIP_Header import LFC
 import pyshark
 
 # to change a piece of data, you need to create a new object and assign it to the field

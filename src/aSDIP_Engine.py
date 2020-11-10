@@ -1,13 +1,15 @@
 
+#this is where packets are recieved and encoded
+
+
 import pyshark
 from socket import socket, AF_PACKET, SOCK_RAW
 
 import sys
-import templateattacks
 import netifaces
 
-from aSDIP_Arb_Code import yourcode
-from aSDIP_Header import LFC
+from .aSDIP_Arb_Code import yourcode
+from .aSDIP_Header import LFC
 
 ininterface="lo"
 
@@ -86,16 +88,10 @@ def intercept():
             #iface is the interface targetted, filter is a BPF (Berkely Packet Filter 
             # https://en.wikipedia.org/wiki/Berkeley_Packet_Filter)
             # which is used to only capture ethertype of 0x088b8, so GOOSE
-            # promisc="true" mean that it will listen for traffic not destined for itself, so everything
+            
 
             #this function executes your code on the recieved packet
             yourcode(inpacket)
-
-        
-
-
-
-
 
             #Rebuild the packet
 
