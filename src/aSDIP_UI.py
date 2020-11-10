@@ -1,8 +1,21 @@
 #this is where the UI is run from
 
+import os.path
+
+import readline
+
+histfile = os.path.expanduser('~/.someconsole_history')
+histfile_size = 1000
+
 from cmd import Cmd
 from .aSDIP_Engine import *
 from .aSDIP_Examine import *
+
+
+
+
+
+
 
 class main_ui(Cmd):
     prompt = '(main)    >>> '
@@ -58,6 +71,6 @@ class main_ui(Cmd):
             Examine_ui().cmdloop()
         except KeyboardInterrupt:
             print()
-            return
+            return True
 
 

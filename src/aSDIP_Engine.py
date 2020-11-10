@@ -80,7 +80,7 @@ def intercept():
             print("waiting for packet")
             cap=pyshark.LiveCapture(interface=ininterface,bpf_filter="ether proto 0x88b8",include_raw=True,use_json=True)
             cap.sniff(packet_count=1)
-
+            print(type(cap))
             inpacket=cap[0]
             print(type(inpacket))
 
