@@ -80,7 +80,7 @@ def intercept():
             print("waiting for packet")
             cap=pyshark.LiveCapture(interface=ininterface,bpf_filter="ether proto 0x88b8",include_raw=True,use_json=True)
             cap.sniff(packet_count=1)
-            print(type(cap))
+
             inpacket=cap[0]
             print(type(inpacket))
 
@@ -204,9 +204,9 @@ def intercept():
             #Actually no idea what this is for, but ABB have it in there
             outpacket+=bytearray.fromhex("81")
 
-
             #calculates the 0x61 length
             outpacket+=DataToBytesRaw(int(int(len(inpacket.goose.goosePdu_element_raw[0]))/2))
+ 
 
             outpacket+=goosefull
 
@@ -233,5 +233,4 @@ def intercept():
             print("Leaving intercept mode")
             return
     return
-
 

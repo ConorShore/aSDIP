@@ -6,8 +6,8 @@ packets=0
 
 def sniff_from_file(s):
     s="/mnt/hgfs/OneDrive/Documents/University/Year 3/Project/GOOSE Spoofing/61850 Packet Capture/Single GOOSE.pcapng"
-    s=s.replace('\"','')
-    
+    s=s.replace('\"','') #get rid of quote marks if they are present
+
     try:
         globals()['packets']=pyshark.FileCapture(s,display_filter="goose",include_raw=True,use_json=True)
     except:
@@ -15,16 +15,15 @@ def sniff_from_file(s):
         return False
 
     counter=0
-    print("Number\tDst\t\t\tSrc\t\t\tEtherType")
+    print("Number\tDst\t\tSrc\t\tEtherType")
     try:
         for element in packets:
-            print(str(counter) + "\t" + element.eth.dst_raw[0] + "\t" + element.eth.src_raw[0] + "\t" + element.eth.type_raw[0])
+            print(str(counter) + "\t" + element.eth.dst_raw[0] + "\t" + element.eth.src_raw[0] + "\t0x" + element.eth.type_raw[0])
             #print(element)
             counter+=1
     except:
         print()
         return False
-    
   
     return True
     #create another UI to select target packet
