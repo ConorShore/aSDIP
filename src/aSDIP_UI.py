@@ -5,8 +5,8 @@ from .aSDIP_Engine import *
 from .aSDIP_Examine import *
 
 class main_ui(Cmd):
-    prompt = '>>> '
-    intro = "aSDIP - 61850 packet manipulator - Type ? to list commands\nBy default lo is used for in an out"
+    prompt = '(main)    >>> '
+    intro = "aSDIP - 61850 packet manipulator - Type ? to list commands\nBy default lo is used for in and out"
 
     def do_exit(self,s):
         print("Bye")
@@ -48,10 +48,16 @@ class main_ui(Cmd):
             print("Network adapter doesn't exist: " + s)
         return
         
-    
     def help_set_out_if(self,s):
         print("Used to set sniff interface. dont use quotes or spaces, just write the if name")
         print("An example >>> set_out_if ens33")
         return
+
+    def do_examine(self,s):
+        try:
+            Examine_ui().cmdloop()
+        except KeyboardInterrupt:
+            print()
+            return
 
 
