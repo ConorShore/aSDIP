@@ -18,7 +18,7 @@ from .aSDIP_Examine import *
 
 
 class main_ui(Cmd):
-    prompt = '(main)    >>> '
+    prompt = '(main)\t>>> '
     intro = "aSDIP - 61850 packet manipulator - Type ? to list commands\nBy default lo is used for in and out"
 
     def do_exit(self,s):
