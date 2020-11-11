@@ -13,7 +13,6 @@ import pyshark
 
 def yourcode(inpacket):  
     #sqnum attack
-    print(type(inpacket))
     print("Original sqNum " + inpacket.goose.goosePdu_element.sqNum_raw[0])
     c=int(inpacket.goose.goosePdu_element.sqNum_raw[0],16)+1 ##convert to int to increment
     c=format(c,'x') #format back to hex

@@ -87,7 +87,6 @@ def intercept():
             cap.sniff(packet_count=1)
 
             inpacket=cap[0]
-            print(type(inpacket))
 
             # sniff will try to get packets from network, count=1 means get 1 packet then finish
             #iface is the interface targetted, filter is a BPF (Berkely Packet Filter 
@@ -250,7 +249,6 @@ def intercept():
             rawpacket=bytearray.fromhex(inpacket.frame_raw.value)
 
             if trailingbyte>0:
-                print(rawpacket[len(outpacket):len(bytearray.fromhex(inpacket.frame_raw.value))])
                 
                 outpacket+=rawpacket[len(outpacket):len(bytearray.fromhex(inpacket.frame_raw.value))]
 
