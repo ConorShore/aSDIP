@@ -10,3 +10,6 @@ try:
 except KeyboardInterrupt:
     print()
     print("Bye!")
+except EOFError:
+    print()
+    print("bye!")
