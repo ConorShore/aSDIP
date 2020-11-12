@@ -85,18 +85,15 @@ class packetsend(object):
         self.__plist.clear()
 
     def add(self,packet):
-        print("add")
         self.__plist.append(packet)
 
     def send(self,interface):
         #Send the packet
-        print("trying to send")
         if(len(self.__plist)>0):
             sock=socket(AF_PACKET,SOCK_RAW)
             sock.bind((interface, 0))
             for packet in self.__plist:
                 sock.send(packet,0)
-                print("sending")
             self.clear()
             return True
         else:
@@ -133,6 +130,31 @@ def printer():
     print("this pro")
     return
 
+
+cap=pyshark.LiveCapture(interface=ininterface,bpf_filter="ether proto 0x88b8",include_raw=True,use_json=True)
+
+class packetbuff(object):
+ 
+    def __init__(self):
+        self.__plist=[]
+
+    def clear(self):
+        self.__plist.clear()
+
+    def add(self,packet):
+        self.__plist.append(packet)
+
+    def push(self,obj):
+        for packet in self.__plist:
+            obj.add(packet)
+
+    def __len__(self):
+        return len(self.__plist)
+
+    def print(self):
+        print(self.__plist)
+
+
 # todo:
 # add vlan support
 def intercept():
@@ -140,25 +162,36 @@ def intercept():
     #look at packets_from_tshark async
     # sendpro = Process(target=processpacket)
     BaseManager.register('sender',packetsend,exposed=('add','send','print'))
+    #BaseManager.register('buff',packetbuff,exposed=('add','push','clear','print'))
     manager=BaseManager()
     manager.start()
     sendo=manager.sender()
+    #buffo=manager.buff()
+
+    cap=pyshark.LiveCapture(interface=ininterface,bpf_filter="ether proto 0x88b8",include_raw=True,use_json=True)
     while (True):
         
         try:       
             #add timeout when they fix it in pyshark
-
-            cap=pyshark.LiveCapture(interface=ininterface,bpf_filter="ether proto 0x88b8",include_raw=True,use_json=True)
-            cap.sniff(packet_count=50)
+            print(cap)
+            
+            cap.sniff(packet_count=500)
+            print("a")
             #print(packet)
             #s=Process(target=printer)
            # s.start()
            # s.join()
+     
             p=Process(target=processpacket,args=(cap,sendo))
             p.start()
             if(sendo.send(outinterface)==True):
-                sleep(0.01)
+                sleep(0.002)
         except KeyboardInterrupt:
+            print(cap)
+            p=Process(target=processpacket,args=(cap,sendo))
+            p.start()
+            p.join()
+            sendo.send(outinterface)
             print()
             print("Leaving intercept mode")
             return
