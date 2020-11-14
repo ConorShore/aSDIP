@@ -18,9 +18,10 @@ from math import floor
 
 from multiprocessing import Pool
 from multiprocessing import Process,Value,Manager
-from multiprocessing.managers import BaseManager
+from multiprocessing.managers import BaseManager,MakeProxyType,public_methods
 
-from time import sleep
+from time import sleep,time
+
 
 ininterface="lo"
 
@@ -37,8 +38,6 @@ def changeinif(invar):
 def changeoutif(invar):
     globals()['outinterface']=invar
     return
-    
-
 
 def DataToBytesRaw(invar):
     temp=0
@@ -67,8 +66,6 @@ def DataToBytesRaw(invar):
     
     return bytes(temp)
 
-
-
 def StringToStringHex(input):
     s= ([ord(c) for c in input])
     string=""
@@ -85,7 +82,10 @@ class packetsend(object):
         self.__plist.clear()
 
     def add(self,packet):
-        self.__plist.append(packet)
+        if(isinstance(packet,list)):
+            self.__plist.extend(packet)
+        else:
+            self.__plist.append(packet)
 
     def send(self,interface):
         #Send the packet
@@ -104,8 +104,6 @@ class packetsend(object):
 
     def print(self):
         print(self.__plist)
-
-#sender=packetsend()
 
 import signal, time
 
@@ -131,7 +129,7 @@ def printer():
     return
 
 
-cap=pyshark.LiveCapture(interface=ininterface,bpf_filter="ether proto 0x88b8",include_raw=True,use_json=True)
+
 
 class packetbuff(object):
  
@@ -144,61 +142,109 @@ class packetbuff(object):
     def add(self,packet):
         self.__plist.append(packet)
 
-    def push(self,obj):
-        for packet in self.__plist:
-            obj.add(packet)
-
+    def get(self):
+        return self.__plist
+        
     def __len__(self):
         return len(self.__plist)
 
     def print(self):
+        print("no of packets = " + str(self.__plist))
         print(self.__plist)
 
 
 # todo:
 # add vlan support
+
+
+
 def intercept():
     print("waiting for packet")
     #look at packets_from_tshark async
     # sendpro = Process(target=processpacket)
-    BaseManager.register('sender',packetsend,exposed=('add','send','print'))
-    #BaseManager.register('buff',packetbuff,exposed=('add','push','clear','print'))
+    senderproxy = MakeProxyType('sender',('add','send','print','__len__'))
+    buffproxy = MakeProxyType('buff',('add','push','clear','print','__len__','get'))
+    BaseManager.register('sender',packetsend,senderproxy)
+    BaseManager.register('buff',packetbuff,buffproxy)
     manager=BaseManager()
     manager.start()
     sendo=manager.sender()
-    #buffo=manager.buff()
+    buffo=manager.buff()
 
-    cap=pyshark.LiveCapture(interface=ininterface,bpf_filter="ether proto 0x88b8",include_raw=True,use_json=True)
-    while (True):
-        
-        try:       
-            #add timeout when they fix it in pyshark
-            print(cap)
+    sync=Value('i',0)
+
+    
+
+    def getpacket():
+        cap=pyshark.LiveCapture(interface=ininterface,bpf_filter="ether proto 0x88b8",include_raw=True,use_json=True)
+        while(1):
+            try:
+                cap.apply_on_packets(buffo.add)
+            except KeyboardInterrupt:
+                print("bye")
+                return
             
-            cap.sniff(packet_count=500)
-            print("a")
-            #print(packet)
-            #s=Process(target=printer)
-           # s.start()
-           # s.join()
-     
-            p=Process(target=processpacket,args=(cap,sendo))
-            p.start()
-            if(sendo.send(outinterface)==True):
-                sleep(0.002)
-        except KeyboardInterrupt:
-            print(cap)
-            p=Process(target=processpacket,args=(cap,sendo))
-            p.start()
-            p.join()
-            sendo.send(outinterface)
-            print()
-            print("Leaving intercept mode")
-            return
-        except EOFError:
-            print()
-                
+    
+    buffersize=1000
+    timeoutms=10000
+    millis = lambda: int(round(time.time() * 1000))
+
+    def movesendpackets():
+        print("hello")
+        lasttime=millis()
+        s=Process(target=getpacket)
+        s.start()
+        while(1):
+            try:
+                if(len(buffo)>=buffersize):
+                    print("Size push")
+                    lis=buffo.get()
+                    buffo.clear()
+                    processpacket(lis,sendo)
+                    s.terminate()
+                    sendo.send(outinterface)
+                    sleep(0.001)
+                    s.join()
+                    s=Process(target=getpacket)
+                    s.start()
+                elif(((millis())>(lasttime+timeoutms))and(len(buffo)>0)):
+                    print("Timeout push")
+                    lasttime=millis()
+                    lis=buffo.get()
+                    buffo.clear()
+                    processpacket(lis,sendo)
+                    s.terminate()
+                    sendo.send(outinterface)
+                    sleep(0.001)
+                    s.join()
+                    s=Process(target=getpacket)
+                    s.start()                   
+            except KeyboardInterrupt:
+                print("p bye")
+                s.terminate()
+                sleep(0.001)
+                s.join()
+                if(len(buffo)>0):
+                    print("clearing buffer of packets: " + str(len(buffo)))
+                    print(type(buffo.get()))
+                    processpacket(buffo.get(),sendo)
+                    buffo.clear() 
+                    sendo.send(outinterface)
+
+                return
+            except BrokenPipeError:
+                print("pipe went bye")
+            except:
+                print("Error occured")
+                return
+        
+
+    movesendpackets()
+
+    print()
+    print("Leaving intercept mode")
     return
+
 
 
 
