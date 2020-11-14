@@ -54,7 +54,12 @@ def yourcode(inpacket):
             #print("Found 0x84 (bitstring)")
             #print("flipping all bits")
             #doesnt work for short 1 byte bit strings
-            data=int(inpacket.goose.goosePdu_element.allData_tree.Data_tree[counter].bit_string_raw[0].raw_value,16)^0xffff
+            bitxor=0
+            datalength=int(inpacket.goose.goosePdu_element.allData_tree.Data_tree[counter].bit_string_raw[2])
+            for i in range(datalength):
+                bitxor+=(0xff<<(8*i))
+
+            data=int(inpacket.goose.goosePdu_element.allData_tree.Data_tree[counter].bit_string_raw[0].raw_value,16)^bitxor
             padding=int(inpacket.goose.goosePdu_element.allData_tree.Data_tree[counter].padding_raw[0].raw_value)
             for i in range(0,padding):
                 data=data^(pow(2,i))
