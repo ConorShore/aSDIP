@@ -138,12 +138,16 @@ class packetbuff(object):
 
     def clear(self):
         self.__plist.clear()
+        self.__plist=[]
 
     def add(self,packet):
         self.__plist.append(packet)
 
     def get(self):
-        return self.__plist
+        print("a" + str(type(self.__plist)))
+        l=self.__plist
+        #self.clear()
+        return l
         
     def __len__(self):
         return len(self.__plist)
@@ -177,17 +181,19 @@ def intercept():
 
     def getpacket():
         cap=pyshark.LiveCapture(interface=ininterface,bpf_filter="ether proto 0x88b8",include_raw=True,use_json=True)
-        while(1):
-            try:
-                cap.apply_on_packets(buffo.add)
-            except KeyboardInterrupt:
-                print("bye")
-                return
+        try:
+            cap.apply_on_packets(buffo.add)
+        except KeyboardInterrupt:
+            print("bye")
+            return
+        return
             
     
     buffersize=1000
     timeoutms=10000
     millis = lambda: int(round(time.time() * 1000))
+    
+    #sleeptime=1
 
     def movesendpackets():
         print("hello")
@@ -197,40 +203,43 @@ def intercept():
         while(1):
             try:
                 if(len(buffo)>=buffersize):
-                    print("Size push")
+                    print("Size push " + str(len(buffo)))
                     lis=buffo.get()
                     buffo.clear()
                     processpacket(lis,sendo)
                     s.terminate()
                     sendo.send(outinterface)
-                    sleep(0.001)
                     s.join()
                     s=Process(target=getpacket)
                     s.start()
                 elif(((millis())>(lasttime+timeoutms))and(len(buffo)>0)):
-                    print("Timeout push")
+                    a=millis()
+                    print("Timeout push " + str(len(buffo)))
                     lasttime=millis()
                     lis=buffo.get()
                     buffo.clear()
                     processpacket(lis,sendo)
+                    b=millis()
                     s.terminate()
                     sendo.send(outinterface)
-                    sleep(0.001)
-                    s.join()
                     s=Process(target=getpacket)
-                    s.start()                   
+                    s.start()   
+                    print(millis()-b)
+                    print(millis()-a)                
             except KeyboardInterrupt:
                 print("p bye")
                 s.terminate()
-                sleep(0.001)
-                s.join()
-                if(len(buffo)>0):
-                    print("clearing buffer of packets: " + str(len(buffo)))
-                    print(type(buffo.get()))
-                    processpacket(buffo.get(),sendo)
-                    buffo.clear() 
-                    sendo.send(outinterface)
 
+                s.join()
+                try:
+                    if(len(buffo)>0):
+                        print("clearing buffer of packets: " + str(len(buffo)))
+                        print("b" + str(type(buffo.get())))
+                        processpacket(buffo.get(),sendo)
+                        buffo.clear() 
+                        sendo.send(outinterface)
+                except:
+                    print("Final clear error")
                 return
             except BrokenPipeError:
                 print("pipe went bye")
