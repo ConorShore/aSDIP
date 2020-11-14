@@ -161,27 +161,27 @@ def intercept():
     #look at packets_from_tshark async
     # sendpro = Process(target=processpacket)
     senderproxy = MakeProxyType('sender',('add','send','print','__len__'))
-    buffproxy = MakeProxyType('deque',('pop','append','extend','__len__','clear'))
+    buffproxy = MakeProxyType('deque',('pop','append','extend','__len__','maxlen','popleft'))
     BaseManager.register('sender',packetsend,senderproxy)
     BaseManager.register('deque',deque,buffproxy)
     manager=BaseManager()
     manager.start()
     sendo=manager.sender()
-    buffo=manager.deque()
+    buffo=manager.deque(maxlen=10000)
+    millis = lambda: int(round(time.time() * 1000))
 
     def getpacket():
         cap=pyshark.LiveCapture(interface=ininterface,bpf_filter="ether proto 0x88b8 or ether proto 0x8100",include_raw=True,use_json=True)
         try:
             cap.apply_on_packets(buffo.append)
         except KeyboardInterrupt:
-            print("bye")
             return
         return
             
     
     buffersize=1000
     timeoutms=20000
-    millis = lambda: int(round(time.time() * 1000))
+
     
     #sleeptime=1
 
@@ -195,7 +195,7 @@ def intercept():
                 if(len(buffo)>=buffersize):
                     print("Size push " + str(len(buffo)))
                     for i in range(buffersize):
-                       processpacket(buffo.pop(),sendo)
+                       processpacket(buffo.popleft(),sendo)
                     s.terminate()
                     sendo.send(outinterface)
                     #s.join()
@@ -206,8 +206,7 @@ def intercept():
                     print("Timeout push " + str(len(buffo)))
                     lasttime=millis()
                     for i in range(leno):
-                       processpacket(buffo.pop(),sendo)
-                    b=millis()
+                       processpacket(buffo.popleft(),sendo)
                     s.terminate()
                     sendo.send(outinterface)
                     s=Process(target=getpacket)
@@ -215,7 +214,6 @@ def intercept():
             except KeyboardInterrupt:
                 print("p bye")
                 s.terminate()
-
                 s.join()
                 try:
                     if(len(buffo)>0):
@@ -232,6 +230,17 @@ def intercept():
 
         
 
+    def scanbuffo():
+        count=0
+        lasttime=millis()
+        while(1):
+            if(millis()>(lasttime+10)):
+                lasttime=millis()
+                print("buf " + str(len(buffo)) +" " + str(count))
+                count+=1
+
+    d=Process(target=scanbuffo)
+    d.start()
     movesendpackets()
 
     print()
