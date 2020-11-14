@@ -42,18 +42,13 @@ def yourcode(inpacket):
     counter=0
     for element in inpacket.goose.goosePdu_element.allData_tree.Data:
         if (element=='3'):
-            #boolean only
-            #print("Found 0x83 (bool)")
-           # print("Flipping all bits")
             if(inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][0]=='00'):
                   inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][0]=LFC('11')  
             else:
                 inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][0]=LFC('00')
 
         elif (element=='4'):
-            #print("Found 0x84 (bitstring)")
-            #print("flipping all bits")
-            #doesnt work for short 1 byte bit strings
+
             bitxor=0
             datalength=int(inpacket.goose.goosePdu_element.allData_tree.Data_tree[counter].bit_string_raw[2])
             for i in range(datalength):
