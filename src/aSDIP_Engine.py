@@ -242,9 +242,15 @@ def intercept():
 
 
 def processpacket(inpacket,sender):
-    
-    if((inpacket.eth.type_raw[0]=='8b88')or(inpacket.vlan.etype_raw[0].raw_value=="88b8")):
-    # outinterface="ens33"
+    isgoose=0
+    if(inpacket.eth.type_raw[0]=="88b8"):
+        isgoose=1
+
+    elif(inpacket.eth.type_raw[0]=="8100"):
+        if(inpacket.vlan.etype_raw[0].raw_value=="88b8"):
+            isgoose=1
+
+    if(isgoose==1):
         # sniff will try to get packets from network, count=1 means get 1 packet then finish
         #iface is the interface targetted, filter is a BPF (Berkely Packet Filter 
         # https://en.wikipedia.org/wiki/Berkeley_Packet_Filter)
@@ -252,7 +258,7 @@ def processpacket(inpacket,sender):
         
        
         #this function executes your code on the recieved packet
-        yourcode(inpacket)
+        #yourcode(inpacket)
 
         #Rebuild the packet
 
@@ -388,7 +394,7 @@ def processpacket(inpacket,sender):
         #start packet off with ethernet header and carry on stacking
         outpacket=etherhead
         
-        if(inpacket.eth.type_raw[0]!='8b88'):
+        if(inpacket.eth.type_raw[0]!="88b8"):
             dei=format(int(inpacket.vlan.dei_raw[3]),'x') #format back to hex
             vlanhead=bytearray.fromhex(dei)
             vlanhead+=bytearray.fromhex(inpacket.vlan.etype_raw[0])
@@ -411,7 +417,6 @@ def processpacket(inpacket,sender):
         rawpacket=bytearray.fromhex(inpacket.frame_raw.value)
 
         if trailingbyte>0:
-            
             outpacket+=rawpacket[len(outpacket):len(bytearray.fromhex(inpacket.frame_raw.value))]
         sender.add(outpacket)
 
