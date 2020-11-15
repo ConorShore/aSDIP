@@ -191,9 +191,6 @@ def intercept():
         if(p1.eth.src_raw[0]!=p2.eth.src_raw[0]):
             comp+=1
 
-
-    #sleeptime=1
-
     def movesendpackets():
         print("hello")
         lasttime=millis()
@@ -203,9 +200,9 @@ def intercept():
             try:
                 if(len(buffo)>=buffersize):
                     print("Size push " + str(len(buffo)))
+                    lasttime=millis()
                     for i in range(buffersize-1):
                        processpacket(buffo.popleft(),sendo)
-                       lasttime=millis()
                     lastpacket=buffo.popleft()
                     processpacket(lastpacket,sendo)
                     sendo.send(outinterface)
@@ -222,8 +219,10 @@ def intercept():
                     leno=len(buffo)
                     print("Timeout push " + str(len(buffo)))
                     lasttime=millis()
-                    for i in range(leno):
+                    for i in range(leno-1):
                        processpacket(buffo.popleft(),sendo)
+                    lastpacket=buffo.popleft()
+                    processpacket(lastpacket,sendo)
                     sendo.send(outinterface)
                     found=0
                     while(found==0):
@@ -289,7 +288,11 @@ def processpacket(inpacket,sender):
         
        
         #this function executes your code on the recieved packet
-        #yourcode(inpacket)
+        try:
+            yourcode(inpacket)
+        except:
+            print("arb code failure")
+            pass
 
         #Rebuild the packet
 
