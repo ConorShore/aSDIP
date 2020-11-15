@@ -24,6 +24,8 @@ from time import sleep,time
 
 from collections import deque
 
+import pickle
+
 
 ininterface="lo"
 
@@ -161,7 +163,7 @@ def intercept():
     #look at packets_from_tshark async
     # sendpro = Process(target=processpacket)
     senderproxy = MakeProxyType('sender',('add','send','print','__len__'))
-    buffproxy = MakeProxyType('deque',('pop','append','extend','__len__','maxlen','popleft'))
+    buffproxy = MakeProxyType('deque',('clear','pop','append','extend','__len__','maxlen','popleft'))
     BaseManager.register('sender',packetsend,senderproxy)
     BaseManager.register('deque',deque,buffproxy)
     manager=BaseManager()
@@ -179,10 +181,17 @@ def intercept():
         return
             
     
-    buffersize=1000
-    timeoutms=20000
+    buffersize=100
+    timeoutms=15000
 
-    
+    def goosecomp(p1,p2):
+        comp=0
+        if(p1.eth.dst_raw[0]!=p2.eth.dst_raw[0]):
+            comp+=1
+        if(p1.eth.src_raw[0]!=p2.eth.src_raw[0]):
+            comp+=1
+
+
     #sleeptime=1
 
     def movesendpackets():
@@ -194,23 +203,36 @@ def intercept():
             try:
                 if(len(buffo)>=buffersize):
                     print("Size push " + str(len(buffo)))
-                    for i in range(buffersize):
+                    for i in range(buffersize-1):
                        processpacket(buffo.popleft(),sendo)
-                    s.terminate()
+                       lasttime=millis()
+                    lastpacket=buffo.popleft()
+                    processpacket(lastpacket,sendo)
                     sendo.send(outinterface)
-                    #s.join()
-                    s=Process(target=getpacket)
-                    s.start()
+                    found=0
+                    #the fast i can do this next section, the less packets lost
+                    while(found==0):
+                        if(len(buffo)!=0):
+                            packet=buffo.popleft()
+                            if(len(packet)==len(lastpacket)): 
+                                if(packet.get_raw_packet()==lastpacket.get_raw_packet()):
+                                    print("found")
+                                    found=1
                 elif(((millis())>(lasttime+timeoutms))and(len(buffo)>0)):
                     leno=len(buffo)
                     print("Timeout push " + str(len(buffo)))
                     lasttime=millis()
                     for i in range(leno):
                        processpacket(buffo.popleft(),sendo)
-                    s.terminate()
                     sendo.send(outinterface)
-                    s=Process(target=getpacket)
-                    s.start()              
+                    found=0
+                    while(found==0):
+                        if(len(buffo)!=0):
+                            packet=buffo.popleft()
+                            if(len(packet)==len(lastpacket)): ##possible optimise this
+                                if(packet.get_raw_packet()==lastpacket.get_raw_packet()):
+                                    print("found")
+                                    found=1   
             except KeyboardInterrupt:
                 print("p bye")
                 s.terminate()
@@ -239,8 +261,8 @@ def intercept():
                 print("buf " + str(len(buffo)) +" " + str(count))
                 count+=1
 
-    d=Process(target=scanbuffo)
-    d.start()
+   # d=Process(target=scanbuffo)
+   # d.start()
     movesendpackets()
 
     print()
