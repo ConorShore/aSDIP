@@ -48,7 +48,6 @@ def yourcode(inpacket):
                 inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][0]=LFC('00')
 
         elif (element=='4'):
-
             bitxor=0
             datalength=int(inpacket.goose.goosePdu_element.allData_tree.Data_tree[counter].bit_string_raw[2])
             for i in range(datalength):
@@ -59,13 +58,17 @@ def yourcode(inpacket):
             for i in range(0,padding):
                 data=data^(pow(2,i))
             data=format(data,'x')
+            if (data=='0'):
+                data=''
+                for i in range(datalength):
+                    data+='00'
             data=inpacket.goose.goosePdu_element.allData_tree.Data_tree[counter].padding_raw[0].raw_value+data
             #print(inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][0])
-            
             inpacket.goose.goosePdu_element.allData_tree.Data_raw[counter][0]=LFC(data)  
-        
+    
+
         counter+=1
 
+    
 
-            
     return 
