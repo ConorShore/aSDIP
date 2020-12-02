@@ -7,7 +7,7 @@ import sys
 #this is the file you execute
 
 from src.aSDIP_UI import *
-from gpiozero import Button
+
 
 
 
@@ -18,13 +18,13 @@ parser.add_argument("-o","--output",type=str,help="sets output interface for non
 parser.add_argument("-b","--button", help="Use this to execute from button press on GPIO2",action="store_true")
 args = parser.parse_args()
 
-while True:
-    for i in range(2,40):
-        try:
-            print(str(i)+"sucess")
-            button=Button(i)
-        except:
-            print(str(i)+"fail")
+
+for i in range(2,40):
+    try:
+        print(str(i)+"sucess")
+        button=Button(i)
+    except:
+        print(str(i)+"fail")
     # print("hi")
     # if(args.button):
     #     button=Button(22, pull_up=False)
