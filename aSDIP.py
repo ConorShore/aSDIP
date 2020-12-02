@@ -18,7 +18,7 @@ parser.add_argument("-o","--output",type=str,help="sets output interface for non
 parser.add_argument("-b","--button", help="Use this to execute from button press on GPIO2",action="store_true")
 args = parser.parse_args()
 
-while true:
+while True:
     if(args.button):
         button=Button(2)
         if button.is_pressed:
