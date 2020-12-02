@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 import argparse
+import sys
 
 
 #this is the file you execute
@@ -24,6 +25,8 @@ if(args.interactive):
         print()
         print("bye!")
 else:
+    log = open("aSDIP.log", "a")
+    sys.stdout = log
     if(args.sniff is not None):
         main_ui().do_set_sniff_if(args.sniff)
     if(args.output is not None):
