@@ -35,10 +35,12 @@ else:
     if(args.button):
         print("Waiting for button")
         GPIO.setup(11, GPIO.IN,pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(11, GPIO.RISING, callback=shutdown)
+        
         while(GPIO.input(11)==1):
             sleep(0.1)
         print("Button press recieved")
+        sleep(1)
+        GPIO.add_event_detect(11, GPIO.RISING, callback=shutdown)
 
 
     os.system("sudo sh -c \"echo 0 >/sys/class/leds/led0/brightness\"")
