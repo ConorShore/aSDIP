@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+#Known Bugs:
+# 1. for some reason, when running this via rc.local, setting the interface by argument has no effect
+
 import argparse
 import sys
 import os

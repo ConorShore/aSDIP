@@ -24,9 +24,9 @@ from time import sleep,time
 from collections import deque
 
 
-ininterface="lo"
+ininterface="eth0"
 
-outinterface="lo"
+outinterface="eth0"
 
 def is_interface_up(interface):
     addr = netifaces.ifaddresses(interface)
