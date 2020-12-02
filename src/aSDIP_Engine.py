@@ -156,6 +156,8 @@ class packetbuff(object):
 
 
 def intercept():
+    print("Sniff interface " + ininterface)
+    print("Out interface " + outinterface)
     print("waiting for packet")
     #look at packets_from_tshark async
     # sendpro = Process(target=processpacket)
