@@ -30,7 +30,6 @@ if(args.interactive):
         print()
         print("bye!")
 else:
-    os.system("sudo ls -a")
     log = open("/home/pi/aSDIP/aSDIP.log", "a")
     sys.stdout = log
     if(args.button):
@@ -39,6 +38,11 @@ else:
         while(GPIO.input(11)==1):
             sleep(0.1)
         print("Button press recieved")
+
+
+    os.system("sudo sh -c \"echo 0 >/sys/class/leds/led0/brightness\"")
+    os.system("sudo sh -c \"echo 1 >/sys/class/leds/led1/brightness\"")
+
 
     if(args.sniff is not None):
         main_ui().do_set_sniff_if(args.sniff)
