@@ -2,8 +2,7 @@
 #this is where packets are recieved and encoded
 
 
-#BUGS:
-#large packet sizes cause excpetion, because dataToBytesRaw can't handle it
+
 
 import pyshark
 from socket import socket, AF_PACKET, SOCK_RAW
@@ -24,12 +23,10 @@ from time import sleep,time
 
 from collections import deque
 
-import pickle
 
+ininterface="ens33"
 
-ininterface="lo"
-
-outinterface="lo"
+outinterface="ens33"
 
 def is_interface_up(interface):
     addr = netifaces.ifaddresses(interface)
@@ -163,7 +160,7 @@ def intercept():
     #look at packets_from_tshark async
     # sendpro = Process(target=processpacket)
     senderproxy = MakeProxyType('sender',('add','send','print','__len__'))
-    buffproxy = MakeProxyType('deque',('clear','pop','append','extend','__len__','maxlen','popleft'))
+    buffproxy = MakeProxyType('deque',('pop','clear','append','extend','__len__','maxlen','popleft'))
     BaseManager.register('sender',packetsend,senderproxy)
     BaseManager.register('deque',deque,buffproxy)
     manager=BaseManager()
@@ -181,15 +178,11 @@ def intercept():
         return
             
     
-    buffersize=100
-    timeoutms=15000
+    buffersize=100000
+    timeoutms=20000
 
-    def goosecomp(p1,p2):
-        comp=0
-        if(p1.eth.dst_raw[0]!=p2.eth.dst_raw[0]):
-            comp+=1
-        if(p1.eth.src_raw[0]!=p2.eth.src_raw[0]):
-            comp+=1
+    
+    sleeptime=2
 
     def movesendpackets():
         print("hello")
@@ -200,38 +193,20 @@ def intercept():
             try:
                 if(len(buffo)>=buffersize):
                     print("Size push " + str(len(buffo)))
-                    lasttime=millis()
-                    for i in range(buffersize-1):
+                    for i in range(buffersize):
                        processpacket(buffo.popleft(),sendo)
-                    lastpacket=buffo.popleft()
-                    processpacket(lastpacket,sendo)
                     sendo.send(outinterface)
-                    found=0
-                    #the fast i can do this next section, the less packets lost
-                    while(found==0):
-                        if(len(buffo)!=0):
-                            packet=buffo.popleft()
-                            if(len(packet)==len(lastpacket)): 
-                                if(packet.get_raw_packet()==lastpacket.get_raw_packet()):
-                                    print("found")
-                                    found=1
+                    sleep(sleeptime)
+                    buffo.clear()
                 elif(((millis())>(lasttime+timeoutms))and(len(buffo)>0)):
                     leno=len(buffo)
                     print("Timeout push " + str(len(buffo)))
                     lasttime=millis()
-                    for i in range(leno-1):
+                    for i in range(leno):
                        processpacket(buffo.popleft(),sendo)
-                    lastpacket=buffo.popleft()
-                    processpacket(lastpacket,sendo)
                     sendo.send(outinterface)
-                    found=0
-                    while(found==0):
-                        if(len(buffo)!=0):
-                            packet=buffo.popleft()
-                            if(len(packet)==len(lastpacket)): ##possible optimise this
-                                if(packet.get_raw_packet()==lastpacket.get_raw_packet()):
-                                    print("found")
-                                    found=1   
+                    sleep(sleeptime)
+                    buffo.clear()              
             except KeyboardInterrupt:
                 print("p bye")
                 s.terminate()
@@ -260,8 +235,8 @@ def intercept():
                 print("buf " + str(len(buffo)) +" " + str(count))
                 count+=1
 
-   # d=Process(target=scanbuffo)
-   # d.start()
+    #d=Process(target=scanbuffo)
+    #d.start()
     movesendpackets()
 
     print()
@@ -288,11 +263,7 @@ def processpacket(inpacket,sender):
         
        
         #this function executes your code on the recieved packet
-        try:
-            yourcode(inpacket)
-        except:
-            print("arb code failure")
-            pass
+        yourcode(inpacket)
 
         #Rebuild the packet
 
@@ -453,4 +424,3 @@ def processpacket(inpacket,sender):
         if trailingbyte>0:
             outpacket+=rawpacket[len(outpacket):len(bytearray.fromhex(inpacket.frame_raw.value))]
         sender.add(outpacket)
-
