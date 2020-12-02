@@ -209,7 +209,7 @@ def intercept():
                     sendo.send(outinterface)
                     sleep(sleeptime)
                     buffo.clear()  
-                elsif(len(buffo)==0):
+                elif(len(buffo)==0):
                     lasttime=millis()            
             except KeyboardInterrupt:
                 print("p bye")
