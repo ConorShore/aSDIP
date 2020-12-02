@@ -7,7 +7,7 @@ import sys
 #this is the file you execute
 
 from src.aSDIP_UI import *
-
+from gpiozero import Button
 
 
 
@@ -19,19 +19,13 @@ parser.add_argument("-b","--button", help="Use this to execute from button press
 args = parser.parse_args()
 
 
-for i in range(2,40):
-    try:
-        print(str(i)+"sucess")
-        button=Button(i)
-    except:
-        print(str(i)+"fail")
-    # print("hi")
-    # if(args.button):
-    #     button=Button(22, pull_up=False)
-    #     if button.is_pressed:
-    #         print("pressed")
-    #     else:
-    #         print("no")
+print("hi")
+if(args.button):
+    button=Button("GPIO4")
+    if button.is_pressed:
+        print("pressed")
+    else:
+        print("no")
 
 
 if(args.interactive):
