@@ -9,7 +9,7 @@ from src.aSDIP_UI import *
 
 parser = argparse.ArgumentParser()
 parser.parse_args()
-parser.add_argument("--interactive",help="Interactive Mode")
+parser.add_argument("interactive",help="Interactive Mode")
 args = parser.parse_args()
 
 
