@@ -49,7 +49,7 @@ else:
         GPIO.add_event_detect(11, GPIO.RISING, callback=shutdown)
 
 
-    os.system("sudo sh -c \"echo 0 >/sys/class/leds/led0/brightness\"")
+    os.system("sudo sh -c \"echo 1 >/sys/class/leds/led0/brightness\"")
     os.system("sudo sh -c \"echo 1 >/sys/class/leds/led1/brightness\"")
 
 
