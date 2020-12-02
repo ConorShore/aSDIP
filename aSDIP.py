@@ -7,8 +7,9 @@ import sys
 #this is the file you execute
 
 from src.aSDIP_UI import *
-from gpiozero import Button
+import RPi.GPIO as GPIO
 
+GPIO.setmode(GPIO.BOARD)
 
 
 parser = argparse.ArgumentParser()
@@ -20,12 +21,13 @@ args = parser.parse_args()
 
 
 print("hi")
-if(args.button):
-    button=Button("GPIO4")
-    if button.is_pressed:
-        print("pressed")
-    else:
-        print("no")
+while True:
+    if(args.button):
+        GPIO.setup(11, GPIO.IN)
+        if (GPIO.input(11)==1):
+            print("pressed")
+        else:
+            print("no")
 
 
 if(args.interactive):
