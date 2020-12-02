@@ -19,18 +19,6 @@ parser.add_argument("-o","--output",type=str,help="sets output interface for non
 parser.add_argument("-b","--button", help="Use this to execute from button press on GPIO2",action="store_true")
 args = parser.parse_args()
 
-
-print("hi")
-while True:
-    if(args.button):
-        sleep(0.5)
-        GPIO.setup(11, GPIO.IN,pull_up_down=GPIO.PUD_UP)
-        if (GPIO.input(11)==1):
-            print("pressed")
-        else:
-            print("no")
-
-
 if(args.interactive):
     try:
         main_ui().cmdloop()
@@ -43,6 +31,13 @@ if(args.interactive):
 else:
     log = open("/home/pi/aSDIP/aSDIP.log", "a")
     sys.stdout = log
+    if(args.button):
+        print("Waiting for button")
+        GPIO.setup(11, GPIO.IN,pull_up_down=GPIO.PUD_UP)
+        while(GPIO.input(11)==1):
+            sleep(0.1)
+        print("Button press recieved")
+
     if(args.sniff is not None):
         main_ui().do_set_sniff_if(args.sniff)
     if(args.output is not None):
