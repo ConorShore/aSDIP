@@ -23,6 +23,7 @@ args = parser.parse_args()
 print("hi")
 while True:
     if(args.button):
+        sleep(0.5)
         GPIO.setup(11, GPIO.IN)
         if (GPIO.input(11)==1):
             print("pressed")
