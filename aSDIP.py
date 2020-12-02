@@ -12,6 +12,12 @@ import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BOARD)
 
+def shutdown(channel):
+    print('shutdown requested')
+    os.system("sudo sh -c \"echo 1 >/sys/class/leds/led0/brightness\"")
+    os.system("sudo sh -c \"echo 0 >/sys/class/leds/led1/brightness\"")
+    os.system("sudo shutdown now")
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i","--interactive", help="Use in interactive mode",action="store_true")
@@ -60,8 +66,3 @@ else:
         print()
         print("bye!")
 
-def shutdown(channel):
-    print('shutdown requested')
-    os.system("sudo sh -c \"echo 1 >/sys/class/leds/led0/brightness\"")
-    os.system("sudo sh -c \"echo 0 >/sys/class/leds/led1/brightness\"")
-    os.system("sudo shutdown now")
