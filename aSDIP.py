@@ -2,6 +2,7 @@
 
 import argparse
 import sys
+import os
 
 
 #this is the file you execute
@@ -29,6 +30,7 @@ if(args.interactive):
         print()
         print("bye!")
 else:
+    os.system("sudo ls -a")
     log = open("/home/pi/aSDIP/aSDIP.log", "a")
     sys.stdout = log
     if(args.button):
