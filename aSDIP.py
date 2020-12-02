@@ -19,13 +19,17 @@ parser.add_argument("-b","--button", help="Use this to execute from button press
 args = parser.parse_args()
 
 while True:
-    print("hi")
-    if(args.button):
-        button=Button(22, pull_up=False)
-        if button.is_pressed:
-            print("pressed")
-        else:
-            print("no")
+    for i in range(40):
+        try:
+            button=Button(i)
+        
+    # print("hi")
+    # if(args.button):
+    #     button=Button(22, pull_up=False)
+    #     if button.is_pressed:
+    #         print("pressed")
+    #     else:
+    #         print("no")
 
 
 if(args.interactive):
