@@ -24,7 +24,7 @@ print("hi")
 while True:
     if(args.button):
         sleep(0.5)
-        GPIO.setup(11, GPIO.IN)
+        GPIO.setup(11, GPIO.IN,pull_up_down=GPIO.PUD_UP)
         if (GPIO.input(11)==1):
             print("pressed")
         else:
