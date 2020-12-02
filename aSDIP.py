@@ -21,7 +21,7 @@ args = parser.parse_args()
 while True:
     print("hi")
     if(args.button):
-        button=Button(2)
+        button=Button(17)
         if button.is_pressed:
             print("pressed")
         else:
