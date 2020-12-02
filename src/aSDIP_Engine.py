@@ -185,7 +185,7 @@ def intercept():
     sleeptime=2
 
     def movesendpackets():
-        print("hello")
+        
         lasttime=millis()
         s=Process(target=getpacket)
         s.start()
