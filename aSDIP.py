@@ -21,8 +21,10 @@ args = parser.parse_args()
 while True:
     for i in range(40):
         try:
+            print(str(i)+"sucess")
             button=Button(i)
-        
+        except:
+            print(str(i)+"fail")
     # print("hi")
     # if(args.button):
     #     button=Button(22, pull_up=False)
