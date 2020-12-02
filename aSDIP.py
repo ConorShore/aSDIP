@@ -19,7 +19,7 @@ parser.add_argument("-b","--button", help="Use this to execute from button press
 args = parser.parse_args()
 
 while True:
-    for i in range(40):
+    for i in range(2,40):
         try:
             print(str(i)+"sucess")
             button=Button(i)
