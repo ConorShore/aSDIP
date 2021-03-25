@@ -39,9 +39,9 @@ if(args.interactive):
         print()
         print("bye!")
 else:
-    log = open("/home/pi/aSDIP/aSDIP.log", "a")
-    sys.stdout = log
     if(args.button):
+        os.system("sudo sh -c \"echo none >/sys/class/leds/led0/trigger\"")
+        os.system("sudo sh -c \"echo none >/sys/class/leds/led1/trigger\"")
         print("Waiting for button")
         GPIO.setup(11, GPIO.IN,pull_up_down=GPIO.PUD_UP)
         
