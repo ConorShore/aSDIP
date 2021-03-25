@@ -45,7 +45,7 @@ else:
         os.system("sudo sh -c \"echo 0 >/sys/class/leds/led1/brightness\"")
         os.system("sudo sh -c \"echo 1 >/sys/class/leds/led0/brightness\"")
         print("Waiting for button")
-        GPIO.setup(11, GPIO.IN,pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(5, GPIO.IN,pull_up_down=GPIO.PUD_UP)
         
         while(GPIO.input(5)==1):
             sleep(0.1)
