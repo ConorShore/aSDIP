@@ -42,8 +42,8 @@ else:
     if(args.button):
         os.system("sudo sh -c \"echo none >/sys/class/leds/led0/trigger\"")
         os.system("sudo sh -c \"echo none >/sys/class/leds/led1/trigger\"")        
-        os.system("sudo sh -c \"echo 0 >/sys/class/leds/led0/brightness\"")
-        os.system("sudo sh -c \"echo 1 >/sys/class/leds/led1/brightness\"")
+        os.system("sudo sh -c \"echo 0 >/sys/class/leds/led1/brightness\"")
+        os.system("sudo sh -c \"echo 1 >/sys/class/leds/led0/brightness\"")
         print("Waiting for button")
         GPIO.setup(11, GPIO.IN,pull_up_down=GPIO.PUD_UP)
         
